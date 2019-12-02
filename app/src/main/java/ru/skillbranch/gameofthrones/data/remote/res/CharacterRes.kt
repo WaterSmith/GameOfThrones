@@ -1,6 +1,6 @@
 package ru.skillbranch.gameofthrones.data.remote.res
 
-data class CharterRes(
+data class CharacterRes(
     val url: String,
     val name: String,
     val gender: String,
@@ -18,3 +18,5 @@ data class CharterRes(
     val tvSeries: List<String> = listOf(),
     val playedBy: List<String> = listOf()
 )
+
+data class CaracterResponse(val result: List<CharacterRes>)

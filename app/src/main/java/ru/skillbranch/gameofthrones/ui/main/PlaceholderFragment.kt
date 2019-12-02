@@ -22,6 +22,7 @@ class PlaceholderFragment : Fragment() {
         pageViewModel = ViewModelProviders.of(this).get(PageViewModel::class.java).apply {
             setIndex(arguments?.getInt(ARG_SECTION_NUMBER) ?: 1)
         }
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(

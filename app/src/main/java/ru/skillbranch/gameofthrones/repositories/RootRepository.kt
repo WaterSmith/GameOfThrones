@@ -1,11 +1,13 @@
 package ru.skillbranch.gameofthrones.repositories
 
 import androidx.annotation.VisibleForTesting
-import ru.skillbranch.gameofthrones.AppConfig
-import ru.skillbranch.gameofthrones.data.local.entities.CharterFull
-import ru.skillbranch.gameofthrones.data.local.entities.CharterItem
-import ru.skillbranch.gameofthrones.data.remote.res.CharterRes
+import kotlinx.coroutines.*
+import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
+import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
+import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
+import ru.skillbranch.gameofthrones.retrofit.BaseRepository
+import ru.skillbranch.gameofthrones.retrofit.NetworkService
 
 object RootRepository {
 
@@ -15,7 +17,32 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun getAllHouses(result : (houses : List<HouseRes>) -> Unit) {
-        //TODO implement me
+        val api = NetworkService.retrofitApi
+        val fullList = emptyList<HouseRes>().toMutableList()
+        val coroutineContext = Job() + Dispatchers.Default
+        val parentCoroutineContext = SupervisorJob()
+        val parentScope = CoroutineScope(parentCoroutineContext)
+            parentScope.launch {
+            var resultNotEmpty = true
+            var pageNumber = 1
+            //while (resultNotEmpty) {
+                val scope = CoroutineScope(coroutineContext)
+                scope.launch {
+                    val houseResponse = BaseRepository.safeApiCall(
+                        call = { api.getHousesByPage(pageNumber, 50).await() },
+                        errorMessage = "Error Fetching Houses prom $pageNumber page"
+                    )
+                    val listOfHouses = houseResponse?.result?.toMutableList()
+                    if (listOfHouses?.size ?: 0 > 0) {
+                        fullList.addAll(listOfHouses!!)
+                    } else {
+                        resultNotEmpty = false
+                    }
+                }.join()
+                pageNumber++
+            //}
+        }
+        result(fullList)
     }
 
     /**
@@ -35,7 +62,7 @@ object RootRepository {
      * @param result - колбек содержащий в себе список данных о доме и персонажей в нем (Дом - Список Персонажей в нем)
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun getNeedHouseWithCharters(vararg houseNames: String, result : (houses : List<Pair<HouseRes, List<CharterRes>>>) -> Unit) {
+    fun getNeedHouseWithCharters(vararg houseNames: String, result : (houses : List<Pair<HouseRes, List<CharacterRes>>>) -> Unit) {
         //TODO implement me
     }
 
@@ -52,12 +79,12 @@ object RootRepository {
 
     /**
      * Запись данных о пересонажах в DB
-     * @param charters - Список персонажей (модель CharterRes - модель ответа из сети)
+     * @param characters - Список персонажей (модель CharterRes - модель ответа из сети)
      * необходимо произвести трансформацию данных
      * @param complete - колбек о завершении вставки записей db
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun insertCharters(charters : List<CharterRes>, complete: () -> Unit) {
+    fun insertCharters(characters : List<CharacterRes>, complete: () -> Unit) {
         //TODO implement me
     }
 
@@ -77,7 +104,7 @@ object RootRepository {
      * @param result - колбек содержащий в себе список краткой информации о персонажах дома
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun findChartersByHouseName(name : String, result: (charters : List<CharterItem>) -> Unit) {
+    fun findChartersByHouseName(name : String, result: (characters : List<CharacterItem>) -> Unit) {
         //TODO implement me
     }
 
@@ -88,7 +115,7 @@ object RootRepository {
      * @param result - колбек содержащий в себе полную информацию о персонаже
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun findCharterFullById(id : String, result: (charter : CharterFull) -> Unit) {
+    fun findCharterFullById(id : String, result: (character : CharacterFull) -> Unit) {
         //TODO implement me
     }
 
