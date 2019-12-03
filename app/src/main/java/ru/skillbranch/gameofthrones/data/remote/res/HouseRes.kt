@@ -18,5 +18,3 @@ data class HouseRes(
     val cadetBranches: List<Any> = listOf(),
     val swornMembers: List<String> = listOf()
 )
-
-data class HouseResponse(val result: List<HouseRes>)

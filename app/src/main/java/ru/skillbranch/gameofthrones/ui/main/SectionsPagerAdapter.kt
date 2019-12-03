@@ -4,15 +4,16 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import ru.skillbranch.gameofthrones.data.NeedHouses.*
 
 private val TAB_TITLES = arrayOf(
-    HouseItem.STARK,
-    HouseItem.LANNISTER,
-    HouseItem.TARGARYEN,
-    HouseItem.BARATHEON,
-    HouseItem.GREYJOY,
-    HouseItem.MARTEL,
-    HouseItem.TYRELL
+    STARK,
+    LANNISTER,
+    TARGARYEN,
+    BARATHEON,
+    GREYJOY,
+    MARTEL,
+    TYRELL
 )
 
 /**
@@ -25,7 +26,7 @@ class SectionsPagerAdapter(private val context: Context, fm: FragmentManager) :
     override fun getItem(position: Int): Fragment {
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
-        return PlaceholderFragment.newInstance(position + 1)
+        return PlaceholderFragment.newInstance(position)
     }
 
     override fun getPageTitle(position: Int): CharSequence? {
@@ -36,15 +37,4 @@ class SectionsPagerAdapter(private val context: Context, fm: FragmentManager) :
         // Show 2 total pages.
         return TAB_TITLES.count()
     }
-}
-
-enum class HouseItem(val shortName:String) {
-    STARK("Stark"),
-    LANNISTER("Lannister"),
-    TARGARYEN("Targaryen"),
-    BARATHEON("Baratheon"),
-    GREYJOY("Greyjoy"),
-    MARTEL("Martel"),
-    TYRELL("Tyrell");
-
 }

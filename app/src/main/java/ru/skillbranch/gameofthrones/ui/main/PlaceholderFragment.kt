@@ -9,19 +9,22 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import ru.skillbranch.gameofthrones.R
+import ru.skillbranch.gameofthrones.data.NeedHouses
+
 
 /**
  * A placeholder fragment containing a simple view.
  */
 class PlaceholderFragment : Fragment() {
 
-    private lateinit var pageViewModel: PageViewModel
+    private lateinit var housePageViewModel: HousePageViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pageViewModel = ViewModelProviders.of(this).get(PageViewModel::class.java).apply {
-            setIndex(arguments?.getInt(ARG_SECTION_NUMBER) ?: 1)
+        housePageViewModel = ViewModelProviders.of(this).get(HousePageViewModel::class.java).apply {
+            setHouse(NeedHouses.values().get(arguments?.getInt(ARG_SECTION_NUMBER) ?: 0))
         }
+
         setHasOptionsMenu(true)
     }
 
@@ -31,7 +34,7 @@ class PlaceholderFragment : Fragment() {
     ): View? {
         val root = inflater.inflate(R.layout.fragment_main, container, false)
         val textView: TextView = root.findViewById(R.id.section_label)
-        pageViewModel.text.observe(this, Observer<String> {
+        housePageViewModel.text.observe(this, Observer<String> {
             textView.text = it
         })
         return root

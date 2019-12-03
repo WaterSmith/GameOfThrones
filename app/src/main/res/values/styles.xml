@@ -1,4 +1,5 @@
 <resources>
+    <attr name="houseIcon" format="reference" />
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -17,4 +18,46 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="StarkTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/stark_primary</item>
+        <item name="colorPrimaryDark">@color/stark_dark</item>
+        <item name="colorAccent">@color/stark_accent</item>
+        <item name="houseIcon">@drawable/stark_icon</item>
+    </style>
+
+    <style name="LannisterTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/lannister_primary</item>
+        <item name="colorPrimaryDark">@color/lannister_dark</item>
+        <item name="colorAccent">@color/lannister_accent</item>
+    </style>
+
+    <style name="TargaryenTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/targaryen_primary</item>
+        <item name="colorPrimaryDark">@color/targaryen_dark</item>
+        <item name="colorAccent">@color/targaryen_accent</item>
+    </style>
+
+    <style name="GreyjoyTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/greyjoy_primary</item>
+        <item name="colorPrimaryDark">@color/greyjoy_dark</item>
+        <item name="colorAccent">@color/greyjoy_accent</item>
+    </style>
+
+    <style name="BaratheonTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/baratheon_primary</item>
+        <item name="colorPrimaryDark">@color/baratheon_dark</item>
+        <item name="colorAccent">@color/baratheon_accent</item>
+    </style>
+    
+    <style name="MartelTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/martel_primary</item>
+        <item name="colorPrimaryDark">@color/martel_dark</item>
+        <item name="colorAccent">@color/martel_accent</item>
+    </style>
+
+    <style name="TyrelTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/tyrel_primary</item>
+        <item name="colorPrimaryDark">@color/tyrel_dark</item>
+        <item name="colorAccent">@color/tyrel_accent</item>
+    </style>
 </resources>

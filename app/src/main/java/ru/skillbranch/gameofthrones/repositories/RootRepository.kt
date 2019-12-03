@@ -1,12 +1,12 @@
 package ru.skillbranch.gameofthrones.repositories
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.*
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
-import ru.skillbranch.gameofthrones.retrofit.BaseRepository
 import ru.skillbranch.gameofthrones.retrofit.NetworkService
 
 object RootRepository {
@@ -17,34 +17,21 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun getAllHouses(result : (houses : List<HouseRes>) -> Unit) {
-        val api = NetworkService.retrofitApi
-        val fullList = emptyList<HouseRes>().toMutableList()
-        val coroutineContext = Job() + Dispatchers.Default
-        val parentCoroutineContext = SupervisorJob()
-        val parentScope = CoroutineScope(parentCoroutineContext)
-            parentScope.launch {
-            var resultNotEmpty = true
+        val fullList = mutableListOf<HouseRes>()
+        val scope = CoroutineScope(SupervisorJob())
+        scope.launch {
             var pageNumber = 1
-            //while (resultNotEmpty) {
-                val scope = CoroutineScope(coroutineContext)
-                scope.launch {
-                    val houseResponse = BaseRepository.safeApiCall(
-                        call = { api.getHousesByPage(pageNumber, 50).await() },
-                        errorMessage = "Error Fetching Houses prom $pageNumber page"
-                    )
-                    val listOfHouses = houseResponse?.result?.toMutableList()
-                    if (listOfHouses?.size ?: 0 > 0) {
-                        fullList.addAll(listOfHouses!!)
-                    } else {
-                        resultNotEmpty = false
+            while (true) {
+                    val houseResponse = NetworkService.retrofitApi.getHousesByPage(pageNumber++)
+                    if (houseResponse.isSuccessful) {
+                        val listOfHouses = houseResponse.body()
+                        if (listOfHouses.isNullOrEmpty()) break
+                        fullList.addAll(listOfHouses)
                     }
-                }.join()
-                pageNumber++
-            //}
-        }
-        result(fullList)
-    }
+            }
 
+        }.invokeOnCompletion { result(fullList) }
+    }
     /**
      * Получение данных о требуемых домах по их полным именам (например фильтрация всех домов)
      * @param houseNames - массив полных названий домов (смотри AppConfig)
@@ -52,8 +39,18 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun getNeedHouses(vararg houseNames: String, result : (houses : List<HouseRes>) -> Unit) {
-        //TODO implement me
-
+        val needHousesList = mutableListOf<HouseRes>()
+        val scope = CoroutineScope(SupervisorJob())
+        scope.launch {
+            for (houseName in houseNames) {
+                NetworkService.retrofitApi.getHouseByName(houseName).also {
+                    if (it.isSuccessful) {
+                        val house = it.body()
+                        if (house.isNullOrEmpty().not()) needHousesList.addAll(house!!)
+                    }
+                }
+            }
+        }.invokeOnCompletion { result(needHousesList) }
     }
 
     /**
@@ -62,8 +59,28 @@ object RootRepository {
      * @param result - колбек содержащий в себе список данных о доме и персонажей в нем (Дом - Список Персонажей в нем)
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun getNeedHouseWithCharters(vararg houseNames: String, result : (houses : List<Pair<HouseRes, List<CharacterRes>>>) -> Unit) {
-        //TODO implement me
+    fun getNeedHouseWithCharacters(vararg houseNames: String, result : (houses : List<Pair<HouseRes, List<CharacterRes>>>) -> Unit) {
+        val needHousesWithCharactersList = mutableListOf<Pair<HouseRes,List<CharacterRes>>>()
+        val scope = CoroutineScope(SupervisorJob())
+        getNeedHouses(houseNames = *houseNames){
+            scope.launch {
+                for (house in it) {
+                    val houseCharactersList = mutableListOf<CharacterRes>()
+                    for (member in house.swornMembers) {
+                        val memberId = member.split("/").last()
+                        NetworkService.retrofitApi.getCharacterById(memberId).also {
+                            if (it.isSuccessful) {
+                                val characterRes = it.body()
+                                if (characterRes != null) {
+                                    houseCharactersList.add(characterRes)
+                                }
+                            }
+                        }
+                    }
+                    needHousesWithCharactersList.add(house to houseCharactersList)
+                }
+            }.invokeOnCompletion { result(needHousesWithCharactersList) }
+        }
     }
 
     /**
