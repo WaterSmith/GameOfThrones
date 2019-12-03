@@ -1,6 +1,8 @@
 package ru.skillbranch.gameofthrones.ui.main
 
+import android.content.Context
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +34,19 @@ class PlaceholderFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val root = inflater.inflate(R.layout.fragment_main, container, false)
+// create ContextThemeWrapper from the original Activity Context with the custom theme
+        // create ContextThemeWrapper from the original Activity Context with the custom theme
+        val contextThemeWrapper: Context =
+            ContextThemeWrapper(activity, housePageViewModel.themeId.value?: R.style.AppTheme)
+
+// clone the inflater using the ContextThemeWrapper
+        // clone the inflater using the ContextThemeWrapper
+        val localInflater = inflater.cloneInContext(contextThemeWrapper)
+
+// inflate the layout using the cloned inflater, not default inflater
+        // inflate the layout using the cloned inflater, not default inflater
+
+        val root = localInflater.inflate(R.layout.fragment_main, container, false)
         val textView: TextView = root.findViewById(R.id.section_label)
         housePageViewModel.text.observe(this, Observer<String> {
             textView.text = it
