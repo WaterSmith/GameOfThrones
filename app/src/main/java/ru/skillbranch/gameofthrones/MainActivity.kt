@@ -1,15 +1,14 @@
 package ru.skillbranch.gameofthrones
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import androidx.viewpager.widget.ViewPager
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import androidx.appcompat.widget.SearchView
+
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
 import ru.skillbranch.gameofthrones.repositories.RootRepository
@@ -30,7 +29,6 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         //supportActionBar?.setDisplayHomeAsUpEnabled(true)
         //supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_menu)
-
         fab.setOnClickListener { view ->
             RootRepository.getAllHouses {houses: List<HouseRes> -> houses.forEach{Log.i("result", it.name)} }
         }

@@ -3,10 +3,15 @@ package ru.skillbranch.gameofthrones.repositories
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.*
+import ru.skillbranch.gameofthrones.App
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
+import ru.skillbranch.gameofthrones.data.local.entities.House
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
+import ru.skillbranch.gameofthrones.data.toCharacter
+import ru.skillbranch.gameofthrones.data.toCharacterItem
+import ru.skillbranch.gameofthrones.data.toHouse
 import ru.skillbranch.gameofthrones.retrofit.NetworkService
 
 object RootRepository {
@@ -91,7 +96,11 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun insertHouses(houses : List<HouseRes>, complete: () -> Unit) {
-        //TODO implement me
+        val houseDao = App.getDatabase().getHouseDao()
+        val scope = CoroutineScope(SupervisorJob())
+        scope.launch {
+            houseDao.upsert(houses.map { it.toHouse() })
+        }.invokeOnCompletion { complete() }
     }
 
     /**
@@ -101,8 +110,12 @@ object RootRepository {
      * @param complete - колбек о завершении вставки записей db
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun insertCharters(characters : List<CharacterRes>, complete: () -> Unit) {
-        //TODO implement me
+    fun insertCharacters(characters : List<CharacterRes>, complete: () -> Unit) {
+        val characterDao = App.getDatabase().getCharacterDao()
+        val scope = CoroutineScope(SupervisorJob())
+        scope.launch {
+            characterDao.upsert(characters.map { it.toCharacter() })
+        }.invokeOnCompletion { complete() }
     }
 
     /**
@@ -111,7 +124,10 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun dropDb(complete: () -> Unit) {
-        //TODO implement me
+        val scope = CoroutineScope(SupervisorJob())
+        scope.launch {
+            App.getDatabase().clearAllTables()
+        }.invokeOnCompletion { complete() }
     }
 
     /**
@@ -121,8 +137,17 @@ object RootRepository {
      * @param result - колбек содержащий в себе список краткой информации о персонажах дома
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun findChartersByHouseName(name : String, result: (characters : List<CharacterItem>) -> Unit) {
-        //TODO implement me
+    fun findCharactersByHouseName(name : String, result: (characters : List<CharacterItem>) -> Unit) {
+        val characterDao = App.getDatabase().getCharacterDao()
+        val scope = CoroutineScope(SupervisorJob())
+        var characterItems = listOf<CharacterItem>()
+        scope.launch {
+            characterItems = characterDao.getAll().map {
+                it!!.toCharacterItem()
+            }
+        }.invokeOnCompletion {
+            result(characterItems)
+        }
     }
 
     /**
@@ -132,7 +157,7 @@ object RootRepository {
      * @param result - колбек содержащий в себе полную информацию о персонаже
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun findCharterFullById(id : String, result: (character : CharacterFull) -> Unit) {
+    fun findCharacterFullById(id : String, result: (character : CharacterFull) -> Unit) {
         //TODO implement me
     }
 
@@ -141,7 +166,13 @@ object RootRepository {
      * @param result - колбек о завершении очистки db
      */
     fun isNeedUpdate(result: (isNeed : Boolean) -> Unit){
-        //TODO implement me
+        var isNeed = false
+        val scope = CoroutineScope(SupervisorJob())
+        scope.launch {
+            val firstCharacter = App.getDatabase().getCharacterDao().getFirstEntity()
+            val firstHouse = App.getDatabase().getHouseDao().getFirstEntity()
+            isNeed = (firstCharacter==null && firstHouse==null)
+        }.invokeOnCompletion { result(isNeed) }
     }
 
 }
