@@ -1,16 +1,16 @@
 package ru.skillbranch.gameofthrones.repositories
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import ru.skillbranch.gameofthrones.App
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
-import ru.skillbranch.gameofthrones.data.local.entities.House
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
 import ru.skillbranch.gameofthrones.data.toCharacter
-import ru.skillbranch.gameofthrones.data.toCharacterItem
+import ru.skillbranch.gameofthrones.data.toCharacterFull
 import ru.skillbranch.gameofthrones.data.toHouse
 import ru.skillbranch.gameofthrones.retrofit.NetworkService
 
@@ -44,18 +44,7 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun getNeedHouses(vararg houseNames: String, result : (houses : List<HouseRes>) -> Unit) {
-        val needHousesList = mutableListOf<HouseRes>()
-        val scope = CoroutineScope(SupervisorJob())
-        scope.launch {
-            for (houseName in houseNames) {
-                NetworkService.retrofitApi.getHouseByName(houseName).also {
-                    if (it.isSuccessful) {
-                        val house = it.body()
-                        if (house.isNullOrEmpty().not()) needHousesList.addAll(house!!)
-                    }
-                }
-            }
-        }.invokeOnCompletion { result(needHousesList) }
+        MainRepository.getNeedHouses(houseNames = *houseNames,result = result)
     }
 
     /**
@@ -65,27 +54,7 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun getNeedHouseWithCharacters(vararg houseNames: String, result : (houses : List<Pair<HouseRes, List<CharacterRes>>>) -> Unit) {
-        val needHousesWithCharactersList = mutableListOf<Pair<HouseRes,List<CharacterRes>>>()
-        val scope = CoroutineScope(SupervisorJob())
-        getNeedHouses(houseNames = *houseNames){
-            scope.launch {
-                for (house in it) {
-                    val houseCharactersList = mutableListOf<CharacterRes>()
-                    for (member in house.swornMembers) {
-                        val memberId = member.split("/").last()
-                        NetworkService.retrofitApi.getCharacterById(memberId).also {
-                            if (it.isSuccessful) {
-                                val characterRes = it.body()
-                                if (characterRes != null) {
-                                    houseCharactersList.add(characterRes)
-                                }
-                            }
-                        }
-                    }
-                    needHousesWithCharactersList.add(house to houseCharactersList)
-                }
-            }.invokeOnCompletion { result(needHousesWithCharactersList) }
-        }
+        MainRepository.getNeedHouseWithCharacters(houseNames = *houseNames, result = result)
     }
 
     /**
@@ -142,9 +111,7 @@ object RootRepository {
         val scope = CoroutineScope(SupervisorJob())
         var characterItems = listOf<CharacterItem>()
         scope.launch {
-            characterItems = characterDao.getAll().map {
-                it!!.toCharacterItem()
-            }
+            characterItems = characterDao.getItemsByHouseId(name)
         }.invokeOnCompletion {
             result(characterItems)
         }
@@ -158,8 +125,14 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun findCharacterFullById(id : String, result: (character : CharacterFull) -> Unit) {
-        //TODO implement me
-    }
+        val characterDao = App.getDatabase().getCharacterDao()
+        val scope = CoroutineScope(SupervisorJob())
+        var characterFull : CharacterFull? = null
+        scope.launch {
+            characterFull = characterDao.getFlatFullById(id)?.toCharacterFull()
+        }.invokeOnCompletion {
+            result(characterFull!!)
+        }    }
 
     /**
      * Метод возвращет true если в базе нет ни одной записи, иначе false

@@ -1,18 +1,24 @@
-package ru.skillbranch.gameofthrones.repositories
+package ru.skillbranch.gameofthrones
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
-import org.junit.Ignore
 import org.junit.runner.RunWith
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
+import ru.skillbranch.gameofthrones.repositories.RootRepository
 
+
+/**
+ * Instrumented test, which will execute on an Android device.
+ *
+ * See [testing documentation](http://d.android.com/tools/testing).
+ */
 @RunWith(AndroidJUnit4::class)
 class RootRepositoryTest {
+
     private val stubHouseStark = HouseRes(
         url = "https://www.anapioficeandfire.com/api/houses/362",
         name = "House Stark of Winterfell",
@@ -89,8 +95,8 @@ class RootRepositoryTest {
         ),
         father = "https://www.anapioficeandfire.com/api/characters/867",
         mother = "https://www.anapioficeandfire.com/api/characters/1650",
-        spouse = "",
         allegiances = emptyList(),
+        spouse = "",
         books = emptyList(),
         povBooks = emptyList(),
         tvSeries = emptyList(),
@@ -146,65 +152,6 @@ class RootRepositoryTest {
         playedBy = emptyList()
     )
 
-    @Ignore
-    @Test
-    fun get_all_houses() {
-        //Запись персонажей
-        val lock1 = Object()
-        var actualHouses: List<HouseRes>? = null
-        RootRepository.getAllHouses {
-            actualHouses = it
-            synchronized(lock1) { lock1.notify() }
-        }
-        synchronized(lock1) { lock1.wait() }
-
-        val actualCharacters = actualHouses?.fold(mutableListOf<String>()) { acc, houses ->
-            acc.also { it.addAll(houses.swornMembers) }
-        }
-
-        assertEquals(1567, actualCharacters?.size)
-    }
-
-    @Ignore
-    @Test
-    fun get_need_houses() {
-        //Запись персонажей
-        val lock1 = Object()
-        var actualHouses: List<HouseRes>? = null
-        RootRepository.getNeedHouses(
-            "House Greyjoy of Pyke",
-            "House Tyrell of Highgarden"
-        ) {
-            actualHouses = it
-            synchronized(lock1) { lock1.notify() }
-        }
-        synchronized(lock1) { lock1.wait() }
-
-        val actualCharacters = actualHouses?.fold(mutableListOf<String>()) { acc, houses ->
-            acc.also { it.addAll(houses.swornMembers) }
-        }
-
-        assertEquals(86, actualCharacters?.size)
-    }
-
-    @Ignore
-    @Test
-    fun get_need_houses_with_characters() {
-        val lock1 = Object()
-        var actualHouses: List<Pair<HouseRes, List<CharacterRes>>>? = null
-        RootRepository.getNeedHouseWithCharacters(
-            "House Greyjoy of Pyke"
-        ) {
-            actualHouses = it
-            synchronized(lock1) { lock1.notify() }
-        }
-        synchronized(lock1) { lock1.wait() }
-
-        assertEquals("We Do Not Sow", actualHouses?.first()?.first?.words)
-        assertEquals(42, actualHouses?.first()?.second?.size)
-    }
-
-    @Ignore
     @Test
     fun insert_house_and_drop_db() {
         //Запись в базу
@@ -285,7 +232,6 @@ class RootRepositoryTest {
         assertEquals(stubCharacterLyanna.aliases, actualCharacters?.last()?.aliases)
     }
 
-    @Ignore
     @Test
     fun insert_characters_and_full() {
         ///Дроп базы
@@ -330,5 +276,60 @@ class RootRepositoryTest {
 
         assertEquals(stubCharacterLyanna.name, actualCharacter?.mother?.name)
         assertEquals("Stark", actualCharacter?.mother?.house)
+    }
+
+    @Test
+    fun get_all_houses() {
+        //Запись персонажей
+        val lock1 = Object()
+        var actualHouses: List<HouseRes>? = null
+        RootRepository.getAllHouses {
+            actualHouses = it
+            synchronized(lock1) { lock1.notify() }
+        }
+        synchronized(lock1) { lock1.wait() }
+
+        val actualCharacters = actualHouses?.fold(mutableListOf<String>()) { acc, houses ->
+            acc.also { it.addAll(houses.swornMembers) }
+        }
+
+        assertEquals(1567, actualCharacters?.size)
+    }
+
+    @Test
+    fun get_need_houses() {
+        //Запись персонажей
+        val lock1 = Object()
+        var actualHouses: List<HouseRes>? = null
+        RootRepository.getNeedHouses(
+            "House Greyjoy of Pyke",
+            "House Tyrell of Highgarden"
+        ) {
+            actualHouses = it
+            synchronized(lock1) { lock1.notify() }
+        }
+        synchronized(lock1) { lock1.wait() }
+
+        val actualCharacters = actualHouses?.fold(mutableListOf<String>()) { acc, houses ->
+            acc.also { it.addAll(houses.swornMembers) }
+        }
+
+        assertEquals(86, actualCharacters?.size)
+    }
+
+    @Test
+    fun get_need_houses_with_characters() {
+        val lock1 = Object()
+        var actualHouses: List<Pair<HouseRes, List<CharacterRes>>>? = null
+        RootRepository.getNeedHouseWithCharacters(
+            "House Greyjoy of Pyke"
+        ) {
+            actualHouses = it
+            synchronized(lock1) { lock1.notify() }
+        }
+        synchronized(lock1) { lock1.wait() }
+
+        assertEquals("We Do Not Sow", actualHouses?.first()?.first?.words)
+        assertEquals(42, actualHouses?.first()?.second?.size)
     }
 }

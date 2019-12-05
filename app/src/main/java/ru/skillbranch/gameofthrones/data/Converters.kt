@@ -1,9 +1,9 @@
 package ru.skillbranch.gameofthrones.data
 
 import androidx.room.TypeConverter
-import ru.skillbranch.gameofthrones.data.local.entities.Character
-import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
-import ru.skillbranch.gameofthrones.data.local.entities.House
+import androidx.room.TypeConverters
+import ru.skillbranch.gameofthrones.data.database.ListStringConverter
+import ru.skillbranch.gameofthrones.data.local.entities.*
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
 
@@ -37,7 +37,7 @@ fun CharacterRes.toCharacter():Character{
         father = father.split("/").lastOrNull()?:"", //rel
         mother = mother.split("/").lastOrNull()?:"", //rel
         spouse = spouse,
-        houseId = ""
+        houseId = houseId
     )
 }
 
@@ -76,4 +76,19 @@ fun HouseRes.shortName():String {
         if (it.fullName.equals(this.name)) shortName = it.shortName
     }
     return shortName
+}
+
+fun CharacterFlatFull.toCharacterFull():CharacterFull {
+    return CharacterFull(
+        id = id,
+        name = name,
+        words = words,
+        born = born,
+        died = born,
+        titles = titles,
+        aliases = aliases,
+        house = house, //rel
+        father = if (fatherId.isNotEmpty()) (RelativeCharacter(fatherId, fatherName, fatherHouse)) else null,
+        mother = if (motherId.isNotEmpty()) (RelativeCharacter(motherId, motherName, motherHouse)) else null
+    )
 }
