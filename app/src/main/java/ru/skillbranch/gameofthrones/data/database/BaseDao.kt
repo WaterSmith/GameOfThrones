@@ -1,5 +1,6 @@
 package ru.skillbranch.gameofthrones.data.database
 
+import android.util.Log
 import androidx.room.*
 
 
@@ -22,6 +23,7 @@ abstract class BaseDao<T> {
 
     @Transaction
     open fun upsert(entity: T) {
+        Log.d("addtodb","${entity}")
         val id = insert(entity)
         if (id == -1L) {
             update(entity)
@@ -30,6 +32,7 @@ abstract class BaseDao<T> {
 
     @Transaction
     open fun upsert(entityes: List<T>) {
+        Log.d("addtodb","${entityes}")
         val insertResult = insert(entityes)
         val updateList: MutableList<T> = ArrayList()
         for (i in insertResult.indices) {

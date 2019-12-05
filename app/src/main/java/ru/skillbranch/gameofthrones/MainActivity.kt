@@ -24,14 +24,10 @@ class MainActivity : AppCompatActivity() {
         viewPager.adapter = sectionsPagerAdapter
         val tabs: TabLayout = findViewById(R.id.tabs)
         tabs.setupWithViewPager(viewPager)
-        val fab: FloatingActionButton = findViewById(R.id.fab)
 
         setSupportActionBar(toolbar)
         //supportActionBar?.setDisplayHomeAsUpEnabled(true)
         //supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_menu)
-        fab.setOnClickListener { view ->
-            RootRepository.getAllHouses {houses: List<HouseRes> -> houses.forEach{Log.i("result", it.name)} }
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

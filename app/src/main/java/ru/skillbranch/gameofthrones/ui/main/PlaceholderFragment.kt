@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_main.*
 import ru.skillbranch.gameofthrones.R
 import ru.skillbranch.gameofthrones.data.NeedHouses
@@ -31,7 +32,7 @@ class PlaceholderFragment : Fragment() {
         setHasOptionsMenu(true)
     }
 
-    private fun initViews() {
+    private fun initViews(view: View) {
         characterAdapter = CharacterAdapter{
             //intent = Intent(this, ArchiveActivity::class.java)
             //startActivity(intent)
@@ -39,7 +40,7 @@ class PlaceholderFragment : Fragment() {
 
         val divider = DividerItemDecoration(activity, DividerItemDecoration.VERTICAL)
 
-        with(rv_chat_list){
+        with(view.findViewById<RecyclerView>(R.id.rv_character_list)){
             adapter = characterAdapter
             layoutManager = LinearLayoutManager(activity)
             addItemDecoration(divider)
@@ -48,6 +49,7 @@ class PlaceholderFragment : Fragment() {
 
     private fun initViewModel() {
         housePageViewModel = ViewModelProviders.of(this).get(HousePageViewModel::class.java)
+        housePageViewModel.setHouse(house)
         housePageViewModel.getCharacterData().observe(this, Observer { characterAdapter.updateData(it, house)})
     }
 
@@ -56,7 +58,7 @@ class PlaceholderFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_main, container, false)
-        initViews()
+        initViews(root)
         initViewModel()
         //val textView: TextView = root.findViewById(R.id.section_label)
        // housePageViewModel.text.observe(this, Observer<String> {

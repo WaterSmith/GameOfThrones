@@ -7,7 +7,7 @@ import ru.skillbranch.gameofthrones.data.local.entities.*
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
 
-fun CharacterRes.toCharacter(houseRes: HouseRes):Character{
+fun CharacterRes.toCharacter(houseId: String):Character{
     return Character(
         id = url.split("/").last(),
         name = name,
@@ -20,7 +20,7 @@ fun CharacterRes.toCharacter(houseRes: HouseRes):Character{
         father = father.split("/").lastOrNull()?:"", //rel
         mother = mother.split("/").lastOrNull()?:"", //rel
         spouse = spouse,
-        houseId = houseRes.shortName()
+        houseId = houseId
     )
 }
 

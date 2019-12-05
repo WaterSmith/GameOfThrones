@@ -44,7 +44,7 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun getNeedHouses(vararg houseNames: String, result : (houses : List<HouseRes>) -> Unit) {
-        MainRepository.getNeedHouses(houseNames = *houseNames,result = result)
+        MainRepository.getNeedHouses(houseNames.toList(), result)
     }
 
     /**
@@ -54,7 +54,7 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun getNeedHouseWithCharacters(vararg houseNames: String, result : (houses : List<Pair<HouseRes, List<CharacterRes>>>) -> Unit) {
-        MainRepository.getNeedHouseWithCharacters(houseNames = *houseNames, result = result)
+        MainRepository.getNeedHouseWithCharacters(houseNames.toList(), result)
     }
 
     /**
