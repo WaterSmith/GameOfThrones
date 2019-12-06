@@ -1,17 +1,12 @@
 package ru.skillbranch.gameofthrones.repositories
 
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import ru.skillbranch.gameofthrones.App
-import ru.skillbranch.gameofthrones.data.NeedHouses
-import ru.skillbranch.gameofthrones.data.database.HouseDao
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
-import ru.skillbranch.gameofthrones.data.toCharacter
-import ru.skillbranch.gameofthrones.data.toHouse
 import ru.skillbranch.gameofthrones.retrofit.NetworkService
 
 object MainRepository {
@@ -58,23 +53,23 @@ object MainRepository {
         var characterItems = listOf<CharacterItem>()
         val characterDao = App.getDatabase().getCharacterDao()
         val scope = CoroutineScope(SupervisorJob())
-        scope.launch {
-        isNeedUpdate {
-            if (it) {
-                val houseDao = App.getDatabase().getHouseDao()
-                getNeedHouseWithCharacters(NeedHouses.values().map {it.shortName}){
-                    it.forEach {
-                        val house = it.first.toHouse()
-                        houseDao.upsert(house)
-                        characterDao.upsert(it.second.map{it.toCharacter(house.id)})
-                    }
-                }
-            }
-        }
-        characterItems = characterDao.getItemsByHouseId(name)
-        }.invokeOnCompletion {
-            result(characterItems)
-        }
+        //scope.launch {
+        //isNeedUpdate {
+        //    if (it) {
+        //        val houseDao = App.getDatabase().getHouseDao()
+        //        getNeedHouseWithCharacters(NeedHouses.values().map {it.shortName}){
+        //            it.forEach {
+        //                val house = it.first.toHouse()
+        //                houseDao.upsert(house)
+        //                characterDao.upsert(it.second.map{it.toCharacter(house.id)})
+        //            }
+        //        }
+        //    }
+        //}}.invokeOnCompletion {
+            scope.launch {
+                characterItems = characterDao.getItemsByHouseId(name)
+            }.invokeOnCompletion { result(characterItems) }
+        //}
     }
 
     fun isNeedUpdate(result: (isNeed : Boolean) -> Unit){

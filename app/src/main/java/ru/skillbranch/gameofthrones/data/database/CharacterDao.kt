@@ -22,12 +22,25 @@ abstract class CharacterDao : BaseDao<Character>() {
     @Query("SELECT id, houseId as house, name, titles, aliases FROM characters WHERE houseId = :house")
     abstract fun getItemsByHouseId(house: String): List<CharacterItem>
 
-    @Query("SELECT char.id id, char.name name, houseRel.words words, char.born born, char.died died, char.titles titles, char.aliases aliases, char.houseId house, " +
-            "fatherChar.id fatherId, fatherChar.name fatherName, fatherChar.houseId fatherHouse," +
-            "motherChar.id motherId, motherChar.name motherName, motherChar.houseId motherHouse " +
-            "FROM characters char, houses houseRel, characters fatherChar, characters motherChar " +
-            "WHERE houseRel.id == char.houseId AND char.id == :id " +
-            "AND fatherChar.id == char.father AND motherChar.id == char.mother")
+    @Query("""SELECT  char.id id, 
+                            char.name name, 
+                            houseRel.words words, 
+                            char.born born, 
+                            char.died died, 
+                            char.titles titles, 
+                            char.aliases aliases, 
+                            char.houseId house, 
+                            fatherChar.id fatherId, 
+                            fatherChar.name fatherName, 
+                            fatherChar.houseId fatherHouse, 
+                            motherChar.id motherId, 
+                            motherChar.name motherName, 
+                            motherChar.houseId motherHouse 
+                    FROM characters char, houses houseRel, characters fatherChar, characters motherChar 
+                    WHERE   houseRel.id == char.houseId AND 
+                            char.id == :id AND 
+                            fatherChar.id == char.father AND 
+                            motherChar.id == char.mother""")
     abstract suspend fun getFlatFullById(id: String): CharacterFlatFull?
 
     @Query("SELECT id, name, houseId as house FROM characters WHERE id = :id")

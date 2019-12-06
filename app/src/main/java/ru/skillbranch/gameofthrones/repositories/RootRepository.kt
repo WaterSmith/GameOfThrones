@@ -136,16 +136,10 @@ object RootRepository {
 
     /**
      * Метод возвращет true если в базе нет ни одной записи, иначе false
-     * @param result - колбек о завершении очистки db
+     * @param result - колбек о завершении проверки db
      */
     fun isNeedUpdate(result: (isNeed : Boolean) -> Unit){
-        var isNeed = false
-        val scope = CoroutineScope(SupervisorJob())
-        scope.launch {
-            val firstCharacter = App.getDatabase().getCharacterDao().getFirstEntity()
-            val firstHouse = App.getDatabase().getHouseDao().getFirstEntity()
-            isNeed = (firstCharacter==null && firstHouse==null)
-        }.invokeOnCompletion { result(isNeed) }
+        MainRepository.isNeedUpdate(result)
     }
 
 }

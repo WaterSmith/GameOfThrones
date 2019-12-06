@@ -153,6 +153,7 @@ class RootRepositoryTest {
         playedBy = emptyList()
     )
 
+    @Ignore
     @Test
     fun insert_house_and_drop_db() {
         //Запись в базу
@@ -234,7 +235,7 @@ class RootRepositoryTest {
         assertEquals(stubCharacterLyanna.aliases, actualCharacters?.last()?.aliases)
     }
 
-    @Ignore
+    //@Ignore
     @Test
     fun insert_characters_and_full() {
         ///Дроп базы
@@ -330,12 +331,26 @@ class RootRepositoryTest {
         RootRepository.getNeedHouseWithCharacters(
             "House Greyjoy of Pyke"
         ) {
-            actualHouses = it
+            it.forEach {
+                //val lock0 = Object()
+                RootRepository.insertHouses(listOf(it.first)) {
+                    //synchronized(lock1) { lock0.notify() }
+                }
+                //synchronized(lock0) { lock0.wait() }
+                //val lock2 = Object()
+                RootRepository.insertCharacters(it.second){
+                    //synchronized(lock2) { lock2.notify() }
+                }
+                //synchronized(lock2) { lock2.wait() }
+            }
             synchronized(lock1) { lock1.notify() }
         }
         synchronized(lock1) { lock1.wait() }
 
         assertEquals("We Do Not Sow", actualHouses?.first()?.first?.words)
         assertEquals(42, actualHouses?.first()?.second?.size)
+        actualHouses?.forEach {
+
+        }
     }
 }

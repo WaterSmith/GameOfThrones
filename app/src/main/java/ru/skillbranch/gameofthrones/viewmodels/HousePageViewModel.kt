@@ -7,8 +7,6 @@ import ru.skillbranch.gameofthrones.data.NeedHouses
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
 import ru.skillbranch.gameofthrones.mutableLiveData
 import ru.skillbranch.gameofthrones.repositories.MainRepository
-import ru.skillbranch.gameofthrones.repositories.RootRepository
-import java.util.*
 
 class HousePageViewModel : ViewModel() {
 
@@ -18,15 +16,12 @@ class HousePageViewModel : ViewModel() {
 
     fun setHouse(newHouse: NeedHouses) {
         house.value = newHouse
-        var actualCharacters: List<CharacterItem>? = null
-        val lock = Object()
         MainRepository.findCharactersByHouseName(newHouse.shortName){
-            actualCharacters = it
-            synchronized(lock) { lock.notify() }
+            characters.postValue(it)
         }
-        synchronized(lock) { lock.wait() }
-        characters.value = actualCharacters
+
     }
+
     fun getHouse(): NeedHouses? {
         return house.value
     }
@@ -42,4 +37,5 @@ class HousePageViewModel : ViewModel() {
 
         return result
     }
+
 }

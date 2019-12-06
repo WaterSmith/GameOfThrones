@@ -41,6 +41,7 @@ class CharacterAdapter(val listener: (CharacterItem) -> Unit) : RecyclerView.Ada
 
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         items = data
+        this.house = house
         diffResult.dispatchUpdatesTo(this)
     }
 
